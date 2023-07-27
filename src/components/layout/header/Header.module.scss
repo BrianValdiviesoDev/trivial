@@ -1,0 +1,10 @@
+.header {
+  width: 100%;
+  padding: 10px 20px;
+  height: 60px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 1;
+}
