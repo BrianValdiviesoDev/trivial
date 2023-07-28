@@ -1,0 +1,1 @@
+/*eslint-disable*/module.exports={messages:JSON.parse("{\"¿Cómo te llamas?\":\"What's your name?\",\"Selecciona idioma\":\"Select language\",\"Siguiente\":\"Next\",\"fAkbx1\":\"Start\",\"/rrTRh\":\"Siguiente\"}")};

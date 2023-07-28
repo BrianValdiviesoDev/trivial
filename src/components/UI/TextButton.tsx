@@ -1,4 +1,5 @@
 import styles from "./TextButton.module.scss";
+import { Trans } from "@lingui/react";
 
 const TextButton: React.FC<{
   text: string;
@@ -10,7 +11,7 @@ const TextButton: React.FC<{
       onClick={action}
       className={`${styles.button} ${disabled ? styles.disabled : ""}`}
     >
-      {text}
+      <Trans id={text} />
     </button>
   );
 };

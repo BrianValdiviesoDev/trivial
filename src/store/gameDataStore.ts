@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
 interface GameDataStore {
-  currentStep: number;
-  setCurrentStep: (currentStep: number) => void;
+  currentStep: "selectLanguage" | "selectTopic" | "quizz" | "finish";
+  setCurrentStep: (currentStep: GameDataStore["currentStep"]) => void;
 }
 
 export const useGameDataStore = create<GameDataStore>((set) => ({
-  currentStep: 0,
-  setCurrentStep: (currentStep: number) => set(() => ({ currentStep }))
+  currentStep: "selectLanguage",
+  setCurrentStep: (currentStep) => set({ currentStep })
 }));

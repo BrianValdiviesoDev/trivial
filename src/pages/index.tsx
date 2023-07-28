@@ -9,8 +9,15 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Question, getModels, getQuestions } from "@/services/openai.service";
 import { tts } from "@/services/elevenLabs.service";
+import { Trans } from "@lingui/react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { useAppStatusStore } from "../store/appStatusStore";
 
 const Home = () => {
+  // Router
+  const router = useRouter();
+
   // Refs
   const selectRef = useRef<HTMLSelectElement>(null);
 
@@ -21,25 +28,28 @@ const Home = () => {
     language,
     setLanguage,
     currentTopic,
-    setCurrentTopic,
+    setCurrentTopic
   } = usePlayerDataStore();
+  const { isAppLoading, setIsAppLoading } = useAppStatusStore();
+
+  // Component states
   const { currentStep, setCurrentStep } = useGameDataStore();
   const [explainAudio, setExplainAudio] = useState<AudioBuffer>();
   const [questions, setQuestions] = useState<Question[]>();
   const [currentQuestion, setCurrentQuestion] = useState<number>(-1);
   const [userResponse, setUserResponse] = useState<string>();
-  const [loading, setLoading] = useState<boolean>(false);
 
   const audioFolder = "./assets";
 
   const prepareQuizz = async () => {
     console.log("Loading....");
-    setLoading(true);
+    setIsAppLoading(true);
     const response = await getQuestions(currentTopic, language, 3);
     console.log(response);
     setQuestions(response);
     setCurrentQuestion(0);
-    setLoading(false);
+    setIsAppLoading(false);
+    setCurrentStep("quizz");
   };
 
   const generateResponsesAudios = async (
@@ -150,23 +160,27 @@ const Home = () => {
             alt=""
           />
           <AnimatePresence mode="wait">
-            {currentStep === 0 && (
+            {currentStep === "selectLanguage" && (
               <motion.div
                 className={styles.container_presenter_inputs}
                 initial={{ x: "-100vw", opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{
                   x: "-100vw",
-                  opacity: 0,
-                  position: "absolute",
-                  top: "50%",
+                  opacity: 0
                 }}
                 transition={{ duration: 0.5 }}
               >
-                <input
-                  className={styles.input}
-                  type="text"
-                  onChange={(e) => setName(e.target.value)}
+                <Trans
+                  id="¿Cómo te llamas?"
+                  render={({ translation }) => (
+                    <input
+                      className={styles.input}
+                      type="text"
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={translation as string}
+                    />
+                  )}
                 />
                 <select
                   ref={selectRef}
@@ -175,7 +189,9 @@ const Home = () => {
                     setLanguage(e.target.value as AvailableLanguages)
                   }
                 >
-                  <option value="">Language select</option>
+                  <option value="" disabled>
+                    <Trans id="Selecciona idioma" />
+                  </option>
                   {LANGUAGES.map((language) => (
                     <option key={language.code} value={language.code}>
                       {language.name}
@@ -183,34 +199,83 @@ const Home = () => {
                   ))}
                 </select>
                 <TextButton
-                  text="Next"
-                  action={() => setCurrentStep(currentStep + 1)}
+                  text="Siguiente"
+                  action={() => setCurrentStep("selectTopic")}
                   disabled={!name || !selectRef.current?.value}
                 />
               </motion.div>
             )}
           </AnimatePresence>
           <AnimatePresence mode="wait">
-            {currentStep === 1 && (
+            {currentStep === "selectTopic" && (
               <motion.div
                 className={styles.container_presenter_topics}
                 initial={{ x: "100vw", opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                exit={{ x: "100vw", opacity: 0, position: "absolute" }}
-                transition={{ duration: 0.5 }}
+                exit={{
+                  x: "100vw",
+                  opacity: 0
+                }}
+                transition={{ duration: 0.5, delay: 0.5 }}
               >
-                <input
-                  className={styles.input}
-                  type="text"
-                  onChange={(e) => setCurrentTopic(e.target.value)}
+                <Trans
+                  id="¿Sobre qué tema quieres jugar?"
+                  render={({ translation }) => (
+                    <input
+                      className={styles.input}
+                      type="text"
+                      onChange={(e) => setCurrentTopic(e.target.value)}
+                      placeholder={translation as string}
+                    />
+                  )}
                 />
-                <TextButton text="Start" action={prepareQuizz} />
-                <TextButton
+
+                <TextButton text="Comenzar" action={prepareQuizz} />
+                {/* <TextButton
                   text="Next"
                   action={() =>
                     setUserResponse("Aqui va el texto de la pregunta")
                   }
-                />
+                /> */}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AnimatePresence mode="wait">
+            {currentStep === "quizz" && (
+              <motion.div
+                className={styles.container_presenter_quizz}
+                initial={{ x: "100vw", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{
+                  x: "100vw",
+                  opacity: 0
+                }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <div className={styles.container_presenter_quizz__question}>
+                  {questions && (
+                    <p
+                      className={
+                        styles.container_presenter_quizz__question__text
+                      }
+                    >
+                      {questions[currentQuestion].question}
+                    </p>
+                  )}
+                </div>
+                <div className={styles.container_presenter_quizz__options}>
+                  {questions && (
+                    <>
+                      {questions[currentQuestion].options.map((option, i) => (
+                        <TextButton
+                          key={i}
+                          text={option}
+                          action={() => setUserResponse(option)}
+                        />
+                      ))}
+                    </>
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

@@ -2,7 +2,8 @@ import { useCallback } from "react";
 import Particles from "react-particles";
 import { loadFull } from "tsparticles";
 import type { Container, Engine } from "tsparticles-engine";
-import Header from "./header/Header";
+import { useAppStatusStore } from "../../store/appStatusStore";
+import { AnimatePresence, motion } from "framer-motion";
 
 type Props = {
   children: React.ReactNode;
@@ -21,9 +22,23 @@ const Layout: React.FC<Props> = ({ children }) => {
     []
   );
 
+  // Store
+  const { isAppLoading } = useAppStatusStore();
+
   return (
     <div className="container">
-      <Header />
+      <AnimatePresence mode="wait">
+        {isAppLoading && (
+          <motion.div
+            className="loader-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <span className="loader"></span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <main className="main">{children}</main>
       <Particles
         id="tsparticles"

@@ -2,28 +2,6 @@
   --max-width: 1390px;
   --border-radius: 8px;
 
-  --border-color: transparent;
-
-  --primary-color: #28348b;
-  --secondary-color: #4052a0;
-  --font-color: #3e3e3e;
-  --font-color-inverse: #94a3b8;
-  --font-grey: #94a3b8;
-  --bg-color: #eff1f6;
-  --bg-color-light: #fff;
-  --bg-color-inverse: #16181d;
-  --heading-color: #3e3e3e;
-  --shadow-color: 0deg 0% 50%;
-  --shadow: 16px 32px 32px hsl(var(--shadow-color) / 0.2);
-  --page-background: linear-gradient(
-    290deg,
-    rgba(116, 171, 221, 1) 0%,
-    rgba(64, 82, 160, 1) 50%,
-    rgba(40, 52, 139, 1) 100%
-  );
-}
-
-html[data-theme="dark"] {
   --border-color: rgba(255, 255, 255, 0.2);
   --primary-color: #28348b;
   --secondary-color: #4052a0;
@@ -35,6 +13,12 @@ html[data-theme="dark"] {
   --bg-color-inverse: #eff1f6;
   --heading-color: #fff;
   --shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.1);
+  --page-background: linear-gradient(
+    290deg,
+    rgba(116, 171, 221, 1) 0%,
+    rgba(64, 82, 160, 1) 50%,
+    rgba(40, 52, 139, 1) 100%
+  );
 }
 
 * {
@@ -130,9 +114,50 @@ body > #__next {
   position: absolute;
   width: 100%;
   height: 100%;
-  // z-index: 0;
   animation: fadeIn 0.5s ease-in-out;
   background-color: transparent;
+}
+
+.loader-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.loader {
+  position: absolute;
+  display: inline-block;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.loader::before {
+  content: "Loading";
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 48px;
+  letter-spacing: 2px;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: floating 1s ease-out infinite alternate;
+}
+.loader::after {
+  content: "";
+  width: 100%;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  filter: blur(4px);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: animloader 1s ease-out infinite alternate;
 }
 
 // Animations
@@ -143,5 +168,23 @@ body > #__next {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-25px);
+  }
+}
+
+@keyframes animloader {
+  0% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1.2);
   }
 }
