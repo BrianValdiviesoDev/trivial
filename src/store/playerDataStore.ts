@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { AvailableLanguages, AvailableTopics } from "../utils/constans";
+import { AvailableLanguages } from "../utils/constans";
 
 type history = {
-  topic: AvailableTopics;
+  topic: string;
   score: number;
 };
 
@@ -13,8 +13,8 @@ interface PlayerDataStore {
   setLanguage: (language: AvailableLanguages) => void;
   currentScore: number;
   setCurrentScore: (score: number) => void;
-  currentTopic: AvailableTopics;
-  setCurrentTopic: (topic: AvailableTopics) => void;
+  currentTopic: string;
+  setCurrentTopic: (topic: string) => void;
   history: history[];
   setHistory: (history: history[]) => void;
 }
@@ -27,7 +27,7 @@ export const usePlayerDataStore = create<PlayerDataStore>((set) => ({
   currentScore: 0,
   setCurrentScore: (currentScore: number) => set(() => ({ currentScore })),
   currentTopic: "",
-  setCurrentTopic: (currentTopic: AvailableTopics) =>
+  setCurrentTopic: (currentTopic: string) =>
     set(() => ({ currentTopic })),
   history: [],
   setHistory: (history: history[]) => set(() => ({ history }))
