@@ -12,10 +12,10 @@ const LanguageModels = [
 ];
 
 export const tts = async (text:string, languageCode:string):Promise<AudioBuffer> => {
-    const url = `https://api.elevenlabs.io/v1/text-to-speech/${process.env.PRESENTER_VOICEID}`;
+    const url = `https://api.elevenlabs.io/v1/text-to-speech/${process.env.NEXT_PUBLIC_PRESENTER_VOICEID}`;
     const headers = {
         'Accept': 'audio/mpeg',
-        'xi-api-key': process.env.ELEVENLABS_API_KEY,
+        'xi-api-key': process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY,
         'Content-Type': 'application/json'
     };
 

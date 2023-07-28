@@ -38,7 +38,7 @@ export const getQuestions = async (topic:string, language:string, numberOfQuesti
     const prompt = language==='es' ? prompt_es : prompt_en;
     const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
     };
 
     const data = JSON.stringify({
@@ -67,7 +67,7 @@ export const getModels = async ()=>{
     const url = 'https://api.openai.com/v1/models';
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
         };
     const response = await axios.get(url, {headers})
     console.log(response)
