@@ -11,14 +11,15 @@ const LanguageModels = [
     }
 ];
 
-export const tts = async (text:string, languageCode:string):Promise<AudioBuffer> => {
-    const url = `https://api.elevenlabs.io/v1/text-to-speech/${process.env.NEXT_PUBLIC_PRESENTER_VOICEID}`;
-    const headers = {
-        'Accept': 'audio/mpeg',
-        'xi-api-key': process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY,
-        'Content-Type': 'application/json'
-    };
+const base_url = 'https://api.elevenlabs.io/v1';
+const headers = {
+  'Accept': 'audio/mpeg',
+  'xi-api-key': process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY,
+  'Content-Type': 'application/json'
+};
 
+export const tts = async (text:string, languageCode:string, voiceId:string):Promise<AudioBuffer> => {
+    const url = `${base_url}/text-to-speech/${voiceId}`;
     const data = {
       text: text,
       model_id: LanguageModels.find((l)=>l.languageCodes.includes(languageCode))?.model_id,
@@ -27,11 +28,15 @@ export const tts = async (text:string, languageCode:string):Promise<AudioBuffer>
         similarity_boost:1
       }
     };
-    console.log("READ: ",text)
     const response = await axios.post(url, data, {headers, responseType: 'arraybuffer'});
-
     const audioContext = new window.AudioContext();
     const decodedAudioData = await audioContext.decodeAudioData(response.data);
     return decodedAudioData;
   }
+
+export const getVoices = async ()=>{
+  const url = `${base_url}/voices`;
+  const response = await axios.get(url, {headers});
+  return response.data?.voices;
+}
     

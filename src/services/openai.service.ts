@@ -70,5 +70,4 @@ export const getModels = async ()=>{
         'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
         };
     const response = await axios.get(url, {headers})
-    console.log(response)
 }
