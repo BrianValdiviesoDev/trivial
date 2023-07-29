@@ -3,10 +3,10 @@ module.exports = {
   catalogs: [
     {
       "path": "public/locales/{locale}/messages",
-      "include": ["src/**/*.{js,jsx,ts,tsx}"]
+      "include": ["src/pages/**/*", "src/components/**/*"]
     }
   ],
-  locales: ["es", "en"],
+  locales: ["en", "es"],
   format: "po",
-  sourceLocale: "es"
+  sourceLocale: "en"
 };

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2023-07-28 21:31+0200\n"
+"POT-Creation-Date: 2023-07-29 10:49+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -14,19 +14,81 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/pages/index.tsx:172
-msgid "¿Cómo te llamas?"
+#: src/components/steps/FinishStep.tsx:34
+msgid "Game Over!"
+msgstr "Game Over!"
+
+#. js-lingui-explicit-id
+#: src/components/steps/FinishStep.tsx:41
+msgid "Total points"
+msgstr "Total points"
+
+#. js-lingui-explicit-id
+#: src/components/steps/FinishStep.tsx:56
+msgid "Topic"
+msgstr "Topic"
+
+#. js-lingui-explicit-id
+#: src/components/steps/FinishStep.tsx:59
+msgid "Score"
+msgstr "Score"
+
+#. js-lingui-explicit-id
+#: src/components/steps/FinishStep.tsx:79
+msgid "Select new topic"
+msgstr "Select new topic"
+
+#. js-lingui-explicit-id
+#: src/pages/index.tsx:273
+msgid "Try again"
+msgstr "Try again"
+
+#. js-lingui-explicit-id
+#: src/components/steps/LanguageNameStep.tsx:68
+msgid "Next"
+msgstr "Next"
+
+#. js-lingui-explicit-id
+#: src/components/steps/TopicStep.tsx:44
+msgid "Start"
+msgstr "Start"
+
+#. js-lingui-explicit-id
+#: src/pages/index.tsx:265
+msgid "There was an error with our services"
+msgstr "There was an error with our services"
+
+#. js-lingui-explicit-id
+#: src/components/steps/LanguageNameStep.tsx:38
+msgid "What's your name?"
 msgstr "What's your name?"
 
 #. js-lingui-explicit-id
-#: src/pages/index.tsx:191
-msgid "Selecciona idioma"
+#: src/components/steps/LanguageNameStep.tsx:56
+msgid "Select language"
 msgstr "Select language"
 
 #. js-lingui-explicit-id
-#: src/pages/index.tsx:199
-#~ msgid "Siguiente"
-#~ msgstr "Next"
+#: src/components/steps/TopicStep.tsx:31
+msgid "What topic do you want to play?"
+msgstr "What topic do you want to play?"
 
-#~ msgid "Comienza"
-#~ msgstr "Start"
+#. js-lingui-explicit-id
+#: src/components/steps/FinishStep.tsx:37
+msgid "You got"
+msgstr "You got"
+
+#. js-lingui-explicit-id
+#: src/pages/resume.tsx:7
+msgid "Resume"
+msgstr "Resume"
+
+#. js-lingui-explicit-id
+#: src/pages/resume.tsx:10
+msgid "Change language"
+msgstr "Change language"
+
+#. js-lingui-explicit-id
+#: src/pages/resume.tsx:13
+msgid "Start new quizz"
+msgstr "Start new quizz"

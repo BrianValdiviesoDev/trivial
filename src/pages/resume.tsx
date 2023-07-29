@@ -1,9 +1,17 @@
+import { Trans } from "@lingui/react";
+
 export const Resume = () => {
   return (
     <>
-      <p>Resumen</p>
-      <button>Change language</button>
-      <button>Start new quizz</button>
+      <p>
+        <Trans id="Resume" />
+      </p>
+      <button>
+        <Trans id="Change language" />
+      </button>
+      <button>
+        <Trans id="Start new quizz" />
+      </button>
     </>
   );
 };

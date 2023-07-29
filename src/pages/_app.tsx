@@ -13,15 +13,12 @@ export default function App({ Component, pageProps }: AppProps) {
   const { language } = usePlayerDataStore();
 
   // Lifecycle component
-  // useEffect(() => {
-  //   router.locale === "es" && i18n.load("es", esMessages);
-  //   router.locale === "en" && i18n.load("en", enMessages);
-  //   i18n.activate(router.locale as string);
-  // }, [router.locale]);
 
   useEffect(() => {
     language === "es" && i18n.load("es", esMessages);
     language === "en" && i18n.load("en", enMessages);
+    language !== "es" && language !== "en" && i18n.load("en", enMessages);
+
     i18n.activate(language as string);
   }, [language]);
 

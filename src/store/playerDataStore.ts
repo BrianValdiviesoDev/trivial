@@ -27,8 +27,7 @@ export const usePlayerDataStore = create<PlayerDataStore>((set) => ({
   currentScore: 0,
   setCurrentScore: (currentScore: number) => set(() => ({ currentScore })),
   currentTopic: "",
-  setCurrentTopic: (currentTopic: string) =>
-    set(() => ({ currentTopic })),
+  setCurrentTopic: (currentTopic: string) => set(() => ({ currentTopic })),
   history: [],
   setHistory: (history: history[]) => set(() => ({ history }))
 }));

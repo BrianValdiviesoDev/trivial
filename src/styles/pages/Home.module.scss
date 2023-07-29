@@ -11,25 +11,160 @@
   z-index: 1;
   &_presenter {
     width: 100%;
-    height: 70vh;
+    height: 80vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    position: relative;
     &__image {
       width: 300px;
       height: auto;
       transition: all 0.4s ease-in-out;
     }
     &_inputs,
-    &_topics {
+    &_topics,
+    &_quizz,
+    &_finish {
       width: 100%;
-      max-width: 400px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      gap: 1rem;
+      & > button,
+      & select {
+        margin-top: 1rem;
+      }
+    }
+    &_quizz {
+      &_question {
+        width: 100%;
+        max-width: 800px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 1) 15%,
+          rgb(83, 137, 199) 100%
+        );
+        color: var(--font-color-inverse);
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 0 40px 0 40px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+          rgba(0, 0, 0, 0.22) 0px 15px 12px;
+        position: absolute;
+        top: -2rem;
+        &_container {
+          position: relative;
+          &__number {
+            position: absolute;
+            display: grid;
+            place-items: center;
+            width: 100px;
+            height: 70px;
+            bottom: -4rem;
+            right: -4rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 0.5rem 1rem;
+            color: var(--font-color-inverse);
+            border-radius: 20px 0 20px 0;
+            background: linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 1) 15%,
+              rgb(83, 137, 199) 100%
+            );
+          }
+        }
+      }
+      &__options {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 1rem;
+      }
+    }
+    &_finish {
+      &__image {
+        width: 300px;
+        height: auto;
+        transition: all 0.4s ease-in-out;
+      }
+      &__gameOver {
+        position: relative;
+        top: -5rem;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        & > p:nth-child(1) {
+          font-size: 6rem;
+        }
+        & > p:nth-child(2),
+        & > p:nth-child(3) {
+          font-size: 2rem;
+          font-weight: 700;
+        }
+      }
+      &__stats {
+        width: 100%;
+        max-width: 500px;
+        max-height: 200px;
+        overflow-y: auto;
+        position: relative;
+        top: -3rem;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 1) 15%,
+          rgb(83, 137, 199) 100%
+        );
+        border-radius: 0 40px 0 40px;
+        padding: 1rem 2rem;
+        &::-webkit-scrollbar-track {
+          margin-top: 40px;
+          margin-bottom: 40px;
+        }
+        & > table {
+          width: 100%;
+          border-collapse: collapse;
+          & > thead {
+            & > tr {
+              & > th {
+                padding: 0.5rem 1rem;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--font-color-inverse);
+                &:nth-child(1) {
+                  text-align: left;
+                }
+                &:nth-child(2) {
+                  text-align: right;
+                }
+              }
+            }
+          }
+          & > tbody {
+            & > tr {
+              & > td {
+                padding: 0.5rem 1rem;
+                font-size: 1.5rem;
+                font-weight: 500;
+                color: var(--font-color-inverse);
+                &:nth-child(1) {
+                  text-align: left;
+                }
+                &:nth-child(2) {
+                  text-align: right;
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -1,39 +1,35 @@
 import Head from "next/head";
 import styles from "@/styles/pages/Home.module.scss";
 
-import { AvailableLanguages, LANGUAGES } from "../utils/constans";
+import { LANGUAGES } from "../utils/constans";
 import { usePlayerDataStore } from "../store/playerDataStore";
 import { useGameDataStore } from "../store/gameDataStore";
 import TextButton from "../components/UI/TextButton";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Question, getModels, getQuestions } from "@/services/openai.service";
 import { Trans } from "@lingui/react";
-import { useRouter } from "next/router";
-import Link from "next/link";
 import { useAppStatusStore } from "../store/appStatusStore";
 import { getVoices, tts } from "@/services/elevenLabs.service";
+import LanguageNameStep from "../components/steps/LanguageNameStep";
+import TopicStep from "../components/steps/TopicStep";
+import QuizzStep from "../components/steps/QuizzStep";
+import FinishStep from "../components/steps/FinishStep";
 
 const Home = () => {
-  // Router
-  const router = useRouter();
-
-  // Refs
-  const selectRef = useRef<HTMLSelectElement>(null);
-
   // Store
   const {
-    name,
-    setName,
     language,
-    setLanguage,
     currentTopic,
-    setCurrentTopic,
+    currentScore,
+    setCurrentScore,
+    history,
+    setHistory
   } = usePlayerDataStore();
-  const { isAppLoading, setIsAppLoading } = useAppStatusStore();
+  const { setIsAppLoading } = useAppStatusStore();
+  const { currentStep, setCurrentStep } = useGameDataStore();
 
   // Component states
-  const { currentStep, setCurrentStep } = useGameDataStore();
   const [questions, setQuestions] = useState<Question[]>();
   const [currentQuestion, setCurrentQuestion] = useState<number>(-1);
   const [questionAudio, setQuestionAudio] = useState<AudioBuffer>();
@@ -42,7 +38,6 @@ const Home = () => {
   const [userResponse, setUserResponse] = useState<string>();
   const [voiceId, setVoiceId] = useState<string>("");
   const [error, setError] = useState<string | null>();
-  const [points, setPoints] = useState<number>(0);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const audioFolder = "./assets";
 
@@ -72,8 +67,8 @@ const Home = () => {
           "Respuesta d",
           "Respuesta e",
           "Respuesta f",
-          "Respuesta g",
-        ],
+          "Respuesta g"
+        ]
       },
       {
         language: "en",
@@ -84,9 +79,9 @@ const Home = () => {
           "Answer d",
           "Answer e",
           "Answer f",
-          "Answer g",
-        ],
-      },
+          "Answer g"
+        ]
+      }
     ];
 
     const preAnswers = indexes.find((l) => l.language === language);
@@ -171,7 +166,7 @@ const Home = () => {
   };
   const getPresenterVoice = async () => {
     const voices = await getVoices();
-    const presenterVoice = voices.find((v) => v.name === "CABRA").voice_id;
+    const presenterVoice = voices.find((v: any) => v.name === "CABRA").voice_id;
     setVoiceId(presenterVoice);
   };
   const checkAnswer = async () => {
@@ -179,7 +174,7 @@ const Home = () => {
       const languageCode =
         LANGUAGES.find((l) => l.code === language)?.code || "en";
       if (userResponse === questions[currentQuestion].answer) {
-        setPoints((prev) => prev + 1);
+        setCurrentScore(currentScore + 1);
         await playFile(`${audioFolder}/correct_${languageCode}.mp3`);
       } else {
         await playFile(`${audioFolder}/error_${languageCode}.mp3`);
@@ -220,7 +215,7 @@ const Home = () => {
 
   useEffect(() => {
     setQuestions(undefined);
-    setPoints(0);
+    setCurrentScore(0);
     const user = usePlayerDataStore.getState();
     if (user.name === "") {
       setCurrentStep("selectLanguage");
@@ -229,6 +224,34 @@ const Home = () => {
     }
     if (voiceId === "") {
       getPresenterVoice();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentStep !== "finish") return;
+    setHistory([
+      ...history,
+      {
+        topic: currentTopic,
+        score: currentScore
+      }
+    ]);
+    localStorage.setItem(
+      "history",
+      JSON.stringify([
+        ...history,
+        {
+          topic: currentTopic,
+          score: currentScore
+        }
+      ])
+    );
+  }, [currentStep]);
+
+  useEffect(() => {
+    const history = localStorage.getItem("history");
+    if (history) {
+      setHistory(JSON.parse(history));
     }
   }, []);
 
@@ -242,174 +265,50 @@ const Home = () => {
       </Head>
       <section className={styles.container}>
         <div className={styles.container_presenter}>
-          {currentStep !== "finish" && (
-            <img
-              onClick={() => repeatAudio()}
-              className={styles.container_presenter__image}
-              src="/assets/cabraTrivial.png"
-              alt=""
-            />
-          )}
           {error ? (
             <>
-              <p>There was an error with our services</p>
+              <p>
+                <Trans id="There was an error with our services" />
+              </p>
               <TextButton
-                text="Reintentar"
                 action={() => {
                   setError(null);
                   setCurrentStep("selectTopic");
                 }}
-              />
+              >
+                <Trans id="Try again" />
+              </TextButton>
             </>
           ) : (
-            <>
-              <AnimatePresence mode="wait">
-                {currentStep === "selectLanguage" && (
-                  <motion.div
-                    className={styles.container_presenter_inputs}
-                    initial={{ x: "-100vw", opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{
-                      x: "-100vw",
-                      opacity: 0,
-                    }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Trans
-                      id="¿Cómo te llamas?"
-                      render={({ translation }) => (
-                        <input
-                          className={styles.input}
-                          type="text"
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder={translation as string}
-                        />
-                      )}
-                    />
-                    <select
-                      ref={selectRef}
-                      className={styles.select}
-                      onChange={(e) =>
-                        setLanguage(e.target.value as AvailableLanguages)
-                      }
-                    >
-                      <option value="" disabled>
-                        <Trans id="Selecciona idioma" />
-                      </option>
-                      {LANGUAGES.map((language) => (
-                        <option key={language.code} value={language.code}>
-                          {language.name}
-                        </option>
-                      ))}
-                    </select>
-                    <TextButton
-                      text="Siguiente"
-                      action={() => setCurrentStep("selectTopic")}
-                      disabled={!name || !selectRef.current?.value}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <AnimatePresence mode="wait">
-                {currentStep === "selectTopic" && (
-                  <motion.div
-                    className={styles.container_presenter_topics}
-                    initial={{ x: "100vw", opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{
-                      x: "100vw",
-                      opacity: 0,
-                    }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                  >
-                    <Trans
-                      id="¿Sobre qué tema quieres jugar?"
-                      render={({ translation }) => (
-                        <input
-                          className={styles.input}
-                          type="text"
-                          onChange={(e) => setCurrentTopic(e.target.value)}
-                          placeholder={translation as string}
-                        />
-                      )}
-                    />
+            <AnimatePresence mode="wait">
+              {currentStep === "selectLanguage" && (
+                <LanguageNameStep
+                  key="selectLanguage"
+                  repeatAudio={repeatAudio}
+                />
+              )}
 
-                    <TextButton text="Comenzar" action={prepareQuizz} />
-                    {/* <TextButton
-                  text="Next"
-                  action={() =>
-                    setUserResponse("Aqui va el texto de la pregunta")
-                  }
-                /> */}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <AnimatePresence mode="wait">
-                {currentStep === "quizz" && (
-                  <motion.div
-                    className={styles.container_presenter_quizz}
-                    initial={{ x: "100vw", opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{
-                      x: "100vw",
-                      opacity: 0,
-                    }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                  >
-                    <div className={styles.container_presenter_quizz__question}>
-                      {questions && (
-                        <p
-                          className={
-                            styles.container_presenter_quizz__question__text
-                          }
-                        >
-                          {questions[currentQuestion].question}
-                        </p>
-                      )}
-                    </div>
-                    <div className={styles.container_presenter_quizz__options}>
-                      {questions && (
-                        <>
-                          {questions[currentQuestion].options.map(
-                            (option, i) => (
-                              <TextButton
-                                key={i}
-                                text={option}
-                                disabled={isSpeaking}
-                                action={() => setUserResponse(option)}
-                              />
-                            )
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <AnimatePresence mode="wait">
-                {currentStep === "finish" && (
-                  <motion.div
-                    className={styles.container_presenter_quizz}
-                    initial={{ x: "100vw", opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{
-                      x: "100vw",
-                      opacity: 0,
-                    }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                  >
-                    <img
-                      className={styles.container_presenter__image}
-                      src="/assets/trofeo.png"
-                      alt=""
-                    />
-                    <p>
-                      Has obtenido {points}/{questions?.length}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </>
+              {currentStep === "selectTopic" && (
+                <TopicStep
+                  prepareQuizz={prepareQuizz}
+                  key="selectTopic"
+                  repeatAudio={repeatAudio}
+                />
+              )}
+              {currentStep === "quizz" && (
+                <QuizzStep
+                  key="quizz"
+                  setUserResponse={setUserResponse}
+                  questions={questions}
+                  currentQuestion={currentQuestion}
+                  isSpeaking={isSpeaking}
+                  repeatAudio={repeatAudio}
+                />
+              )}
+              {currentStep === "finish" && (
+                <FinishStep questions={questions} key="finish" />
+              )}
+            </AnimatePresence>
           )}
         </div>
       </section>

@@ -1,17 +1,17 @@
 import styles from "./TextButton.module.scss";
-import { Trans } from "@lingui/react";
 
-const TextButton: React.FC<{
-  text: string;
+type TextButtonProps = {
   action: () => void;
   disabled?: boolean;
-}> = ({ text, action, disabled }) => {
+  children: React.ReactNode;
+};
+const TextButton = ({ action, disabled, children }: TextButtonProps) => {
   return (
     <button
       onClick={action}
       className={`${styles.button} ${disabled ? styles.disabled : ""}`}
     >
-      <Trans id={text} />
+      {children}
     </button>
   );
 };
