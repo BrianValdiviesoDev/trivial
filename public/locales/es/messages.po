@@ -14,6 +14,11 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/components/layout/footer/Footer.tsx:39
+msgid "Game reset"
+msgstr "Reiniciar juego"
+
+#. js-lingui-explicit-id
 #: src/components/steps/FinishStep.tsx:34
 msgid "Game Over!"
 msgstr "¡Fin del juego!"
@@ -39,37 +44,37 @@ msgid "Select new topic"
 msgstr "Selecciona nuevo tema"
 
 #. js-lingui-explicit-id
-#: src/pages/index.tsx:273
+#: src/pages/index.tsx:410
 msgid "Try again"
 msgstr "Volver a intentar"
 
 #. js-lingui-explicit-id
-#: src/components/steps/LanguageNameStep.tsx:68
+#: src/components/steps/LanguageNameStep.tsx:65
 msgid "Next"
 msgstr "Siguiente"
 
 #. js-lingui-explicit-id
-#: src/components/steps/TopicStep.tsx:44
+#: src/components/steps/TopicStep.tsx:42
 msgid "Start"
 msgstr "Comenzar"
 
 #. js-lingui-explicit-id
-#: src/pages/index.tsx:265
+#: src/pages/index.tsx:402
 msgid "There was an error with our services"
 msgstr "Hubo un error con nuestros servicios"
 
 #. js-lingui-explicit-id
-#: src/components/steps/LanguageNameStep.tsx:38
+#: src/components/steps/LanguageNameStep.tsx:35
 msgid "What's your name?"
 msgstr "¿Cómo te llamas?"
 
 #. js-lingui-explicit-id
-#: src/components/steps/LanguageNameStep.tsx:56
+#: src/components/steps/LanguageNameStep.tsx:53
 msgid "Select language"
 msgstr "Selecciona idioma"
 
 #. js-lingui-explicit-id
-#: src/components/steps/TopicStep.tsx:31
+#: src/components/steps/TopicStep.tsx:29
 msgid "What topic do you want to play?"
 msgstr "¿A qué tema quieres jugar?"
 

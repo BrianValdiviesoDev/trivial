@@ -24,4 +24,12 @@
     position: relative;
     top: 1px;
   }
+  @media (max-width: 1440px) {
+    font-size: 1.2rem;
+  }
+  @media (max-width: 1024px) {
+    font-size: 1rem;
+    min-height: unset;
+    padding: 0.5rem;
+  }
 }

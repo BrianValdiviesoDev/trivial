@@ -5,6 +5,7 @@ export default function Document() {
     <Html lang="en">
       <Head>
         <link rel="preload" href="/assets/cabraTrivial.png" as="image" />
+        <link rel="preload" href="/assets/trofeo.png" as="image" />
       </Head>
 
       <body>

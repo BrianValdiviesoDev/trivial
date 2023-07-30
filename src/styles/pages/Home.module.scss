@@ -2,7 +2,6 @@
 .container {
   width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,6 +11,7 @@
   &_presenter {
     width: 100%;
     height: 80vh;
+    padding: 0 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -21,6 +21,12 @@
       width: 300px;
       height: auto;
       transition: all 0.4s ease-in-out;
+      @media (max-width: 1440px) {
+        width: 250px;
+      }
+      @media (max-width: 1024px) {
+        width: 200px;
+      }
     }
     &_inputs,
     &_topics,
@@ -55,6 +61,12 @@
           rgba(0, 0, 0, 0.22) 0px 15px 12px;
         position: absolute;
         top: -2rem;
+        @media (max-width: 1440px) {
+          font-size: 1.2rem;
+        }
+        @media (max-width: 1024px) {
+          font-size: 1rem;
+        }
         &_container {
           position: relative;
           &__number {
@@ -75,6 +87,18 @@
               rgba(255, 255, 255, 1) 15%,
               rgb(83, 137, 199) 100%
             );
+            @media (max-width: 1440px) {
+              font-size: 1.2rem;
+              width: 80px;
+              height: 50px;
+              bottom: -3rem;
+              right: -3rem;
+            }
+            @media (max-width: 1024px) {
+              font-size: 1rem;
+              width: 60px;
+              height: 40px;
+            }
           }
         }
       }
@@ -85,6 +109,9 @@
         align-items: center;
         justify-content: flex-start;
         gap: 1rem;
+        @media (max-width: 1024px) {
+          gap: 0.5rem;
+        }
       }
     }
     &_finish {
@@ -92,6 +119,9 @@
         width: 300px;
         height: auto;
         transition: all 0.4s ease-in-out;
+        @media (max-width: 768px) {
+          width: 150px;
+        }
       }
       &__gameOver {
         position: relative;
@@ -108,6 +138,26 @@
         & > p:nth-child(3) {
           font-size: 2rem;
           font-weight: 700;
+        }
+        @media (max-width: 1440px) {
+          top: -4rem;
+          & > p:nth-child(1) {
+            font-size: 5rem;
+          }
+          & > p:nth-child(2),
+          & > p:nth-child(3) {
+            font-size: 1.5rem;
+          }
+        }
+        @media (max-width: 768px) {
+          top: -2rem;
+          & > p:nth-child(1) {
+            font-size: 3rem;
+          }
+          & > p:nth-child(2),
+          & > p:nth-child(3) {
+            font-size: 1.5rem;
+          }
         }
       }
       &__stats {
@@ -159,6 +209,46 @@
                 }
                 &:nth-child(2) {
                   text-align: right;
+                }
+              }
+            }
+          }
+        }
+        @media (max-width: 768px) {
+          max-height: 150px;
+          width: 100%;
+          max-width: 400px;
+          top: -1rem;
+          & > table {
+            & > thead {
+              & > tr {
+                & > th {
+                  padding: 0.5rem 1rem;
+                  font-size: 1rem;
+                  font-weight: 700;
+                  color: var(--font-color-inverse);
+                  &:nth-child(1) {
+                    text-align: left;
+                  }
+                  &:nth-child(2) {
+                    text-align: right;
+                  }
+                }
+              }
+            }
+            & > tbody {
+              & > tr {
+                & > td {
+                  padding: 0.5rem 1rem;
+                  font-size: 1rem;
+                  font-weight: 500;
+                  color: var(--font-color-inverse);
+                  &:nth-child(1) {
+                    text-align: left;
+                  }
+                  &:nth-child(2) {
+                    text-align: right;
+                  }
                 }
               }
             }
