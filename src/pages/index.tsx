@@ -51,7 +51,7 @@ const Home = () => {
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const audioFolder = "./assets";
-  const numberOfQuestions = 1;
+  const numberOfQuestions = 5;
 
   const addToConversation = (msg: ChatMessage) => {
     const newConversations = [...conversation, msg];
