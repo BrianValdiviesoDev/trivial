@@ -5,8 +5,7 @@ import { usePlayerDataStore } from "../../store/playerDataStore";
 import TextButton from "../UI/TextButton";
 const TopicStep: React.FC<{
   prepareQuizz: () => Promise<void>;
-  repeatAudio: () => Promise<void>;
-}> = ({ prepareQuizz, repeatAudio }) => {
+}> = ({ prepareQuizz }) => {
   // Store
   const { currentTopic, setCurrentTopic } = usePlayerDataStore();
 
@@ -17,13 +16,12 @@ const TopicStep: React.FC<{
       animate={{ x: 0, opacity: 1 }}
       exit={{
         x: "-100vw",
-        opacity: 0
+        opacity: 0,
       }}
       transition={{ duration: 0.5 }}
     >
       <img
         key="presenter"
-        onClick={() => repeatAudio()}
         className={styles.container_presenter__image}
         src="/assets/cabraTrivial.png"
         alt=""

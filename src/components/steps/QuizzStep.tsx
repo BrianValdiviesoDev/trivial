@@ -14,21 +14,8 @@ const QuizzStep: React.FC<{
   questions,
   currentQuestion,
   isSpeaking,
-  repeatAudio
+  repeatAudio,
 }) => {
-  // const questions: Question[] = [
-  //   {
-  //     question:
-  //       "What is the capital of France What is the capital of France What is the capital of France?",
-  //     options: [
-  //       "Paris Paris Paris Paris ",
-  //       "London",
-  //       "Rome",
-  //       "Madrid Madrid Madrid Madrid Madrid Madrid Madrid Madrid Madrid Madrid Madrid"
-  //     ],
-  //     answer: "Paris"
-  //   } as Question
-  // ];
   return (
     <motion.div
       className={styles.container_presenter_quizz}
@@ -36,7 +23,7 @@ const QuizzStep: React.FC<{
       animate={{ x: 0, opacity: 1 }}
       exit={{
         x: "-100vw",
-        opacity: 0
+        opacity: 0,
       }}
       transition={{ duration: 0.5 }}
     >
@@ -70,7 +57,7 @@ const QuizzStep: React.FC<{
       <div className={styles.container_presenter_quizz__options}>
         {questions && (
           <>
-            {questions[currentQuestion].options.map((option, i) => (
+            {questions[currentQuestion].options?.map((option, i) => (
               <TextButton
                 key={i}
                 disabled={isSpeaking}

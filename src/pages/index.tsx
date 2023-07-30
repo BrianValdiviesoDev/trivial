@@ -7,7 +7,14 @@ import { useGameDataStore } from "../store/gameDataStore";
 import TextButton from "../components/UI/TextButton";
 import { use, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Question, getModels, getQuestions } from "@/services/openai.service";
+import {
+  ChatMessage,
+  Question,
+  chatRequest,
+  getModels,
+  getPrompt,
+  replaceNumbers,
+} from "@/services/openai.service";
 import { Trans } from "@lingui/react";
 import { useAppStatusStore } from "../store/appStatusStore";
 import { getVoices, tts } from "@/services/elevenLabs.service";
@@ -16,6 +23,11 @@ import TopicStep from "../components/steps/TopicStep";
 import QuizzStep from "../components/steps/QuizzStep";
 import FinishStep from "../components/steps/FinishStep";
 
+interface QuestionAudios {
+  question: AudioBuffer;
+  answers: AudioBuffer;
+  explain: AudioBuffer;
+}
 const Home = () => {
   // Store
   const {
@@ -24,7 +36,7 @@ const Home = () => {
     currentScore,
     setCurrentScore,
     history,
-    setHistory
+    setHistory,
   } = usePlayerDataStore();
   const { setIsAppLoading } = useAppStatusStore();
   const { currentStep, setCurrentStep } = useGameDataStore();
@@ -32,27 +44,138 @@ const Home = () => {
   // Component states
   const [questions, setQuestions] = useState<Question[]>();
   const [currentQuestion, setCurrentQuestion] = useState<number>(-1);
-  const [questionAudio, setQuestionAudio] = useState<AudioBuffer>();
-  const [answersAudio, setAnswersAudio] = useState<AudioBuffer>();
-  const [explainAudio, setExplainAudio] = useState<AudioBuffer>();
+  const [audios, setAudios] = useState<QuestionAudios[]>();
   const [userResponse, setUserResponse] = useState<string>();
   const [voiceId, setVoiceId] = useState<string>("");
   const [error, setError] = useState<string | null>();
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const audioFolder = "./assets";
+  const numberOfQuestions = 1;
+
+  const addToConversation = (msg: ChatMessage) => {
+    const newConversations = [...conversation, msg];
+    setConversation(newConversations);
+  };
+
+  const fixNumbers = async (q: Question): Promise<Question> => {
+    const questionHasNumbers = replaceNumbers(q.question);
+    if (questionHasNumbers) {
+      const questionWithoutNumbers = await chatRequest(questionHasNumbers);
+      const myRequest: ChatMessage = {
+        role: "system",
+        content: questionHasNumbers,
+      };
+      const iaResponse: ChatMessage = {
+        role: "assistant",
+        content: questionWithoutNumbers,
+      };
+      addToConversation(myRequest);
+      addToConversation(iaResponse);
+
+      q.question = questionWithoutNumbers;
+    }
+
+    const explainHasNumbers = replaceNumbers(q.explain);
+    if (explainHasNumbers) {
+      const explainWithoutNumbers = await chatRequest(explainHasNumbers);
+      const myRequest: ChatMessage = {
+        role: "system",
+        content: explainHasNumbers,
+      };
+      const iaResponse: ChatMessage = {
+        role: "assistant",
+        content: explainWithoutNumbers,
+      };
+      addToConversation(myRequest);
+      addToConversation(iaResponse);
+
+      q.explain = explainWithoutNumbers;
+    }
+
+    q.options.forEach(async (o, i) => {
+      const hasNumbers = replaceNumbers(o);
+      if (hasNumbers) {
+        const withoutNumbers = await chatRequest(hasNumbers);
+        const myRequest: ChatMessage = {
+          role: "system",
+          content: hasNumbers,
+        };
+        const iaResponse: ChatMessage = {
+          role: "assistant",
+          content: withoutNumbers,
+        };
+        addToConversation(myRequest);
+        addToConversation(iaResponse);
+
+        q.options[i] = withoutNumbers;
+      }
+    });
+
+    return q;
+  };
 
   const prepareQuizz = async () => {
     setIsAppLoading(true);
     try {
-      const response = await getQuestions(currentTopic, language, 1);
-      setQuestions(response);
-      setCurrentQuestion(0);
-      setCurrentStep("quizz");
+      const questions = Array(numberOfQuestions).fill(undefined);
+      const audios = Array(numberOfQuestions).fill(undefined);
+      for (let i = 0; i < numberOfQuestions; i++) {
+        const prompt = getPrompt(currentTopic, language, 1);
+        const myRequest: ChatMessage = {
+          role: "system",
+          content: prompt,
+        };
+        const response = await chatRequest(prompt, conversation);
+        const iaResponse: ChatMessage = {
+          role: "assistant",
+          content: response,
+        };
+        addToConversation(myRequest);
+        addToConversation(iaResponse);
+
+        const data = JSON.parse(response)[0];
+        const newQuestion: Question = {
+          question: data.question,
+          options: data.options,
+          answer: data.answer,
+          explain: data.explain,
+        };
+        questions[i] = newQuestion;
+        setQuestions(questions);
+        const ttsQuestion = await fixNumbers(newQuestion);
+
+        const newAudio = await generateQuestionAudios(ttsQuestion);
+        audios[i] = newAudio;
+        setAudios(audios);
+        if (i === 0) {
+          setCurrentQuestion(0);
+          setCurrentStep("quizz");
+        }
+      }
     } catch (e) {
       setError("OpenAI error");
+      setIsAppLoading(false);
     }
-    setIsAppLoading(false);
   };
+
+  const generateQuestionAudios = async (
+    question: Question
+  ): Promise<QuestionAudios> => {
+    const questionAudio = await tts(question.question, language, voiceId);
+    const responsesAudio = await generateResponsesAudios(
+      question.options,
+      language
+    );
+    const explainAudio = await tts(question.explain, language, voiceId);
+    const response = {
+      question: questionAudio,
+      answers: responsesAudio,
+      explain: explainAudio,
+    };
+    return response;
+  };
+
   const generateResponsesAudios = async (
     responses: string[],
     language: string
@@ -67,8 +190,8 @@ const Home = () => {
           "Respuesta d",
           "Respuesta e",
           "Respuesta f",
-          "Respuesta g"
-        ]
+          "Respuesta g",
+        ],
       },
       {
         language: "en",
@@ -79,71 +202,57 @@ const Home = () => {
           "Answer d",
           "Answer e",
           "Answer f",
-          "Answer g"
-        ]
-      }
+          "Answer g",
+        ],
+      },
     ];
 
     const preAnswers = indexes.find((l) => l.language === language);
-    const newResponses = await Promise.all(
-      responses.map(async (r, i) => {
-        return `${preAnswers?.indexes[i]}.
-          ${r}
-          .
-          .`;
-      })
-    );
+    const newResponses = responses.map((r, i) => {
+      return `${preAnswers?.indexes[i]}.
+        ${r}
+        .
+        .`;
+    });
     const audio = await tts(newResponses.join("."), language, voiceId);
     return audio;
   };
   const getNextQuestion = async () => {
     setUserResponse("");
 
-    if (questions && voiceId) {
-      setIsAppLoading(true);
-      const question = questions[currentQuestion];
-
-      const questionAudio = await tts(question.question, language, voiceId);
-      setQuestionAudio(questionAudio);
-      const responsesAudio = await generateResponsesAudios(
-        question.options,
-        language
-      );
-      setAnswersAudio(responsesAudio);
-
-      const explainAudio = await tts(question.explain, language, voiceId);
-      setExplainAudio(explainAudio);
-      setIsAppLoading(false);
-
-      await playAudio(questionAudio);
-      await playAudio(responsesAudio);
+    if (audios && voiceId) {
+      if (audios[currentQuestion]) {
+        await playAudio(audios[currentQuestion].question);
+        await playAudio(audios[currentQuestion].answers);
+      }
     } else {
       setCurrentStep("selectTopic");
     }
   };
   const repeatAudio = async () => {
-    if (questionAudio) {
-      await playAudio(questionAudio);
-    }
-
-    if (answersAudio) {
-      await playAudio(answersAudio);
+    if (audios) {
+      await playAudio(audios[currentQuestion].question);
+      await playAudio(audios[currentQuestion].answers);
     }
   };
   const playAudio = async (audio: AudioBuffer) => {
-    if (isSpeaking) {
-      return;
+    try {
+      if (isSpeaking) {
+        return;
+      }
+      setIsSpeaking(true);
+      await new Promise<void>((resolve) => {
+        const audioContext = new window.AudioContext();
+        const sourceNode = audioContext.createBufferSource();
+        sourceNode.buffer = audio;
+        sourceNode.connect(audioContext.destination);
+        sourceNode.start();
+        sourceNode.onended = () => resolve();
+      });
+      setIsSpeaking(false);
+    } catch (e) {
+      console.error("Error playing audio");
     }
-    setIsSpeaking(true);
-    await new Promise<void>((resolve) => {
-      const audioContext = new window.AudioContext();
-      const sourceNode = audioContext.createBufferSource();
-      sourceNode.buffer = audio;
-      sourceNode.connect(audioContext.destination);
-      sourceNode.start();
-      sourceNode.onended = () => resolve();
-    });
-    setIsSpeaking(false);
   };
   const playFile = async (url: string) => {
     if (isSpeaking) {
@@ -161,13 +270,19 @@ const Home = () => {
     setIsSpeaking(false);
   };
   const finishQuizz = () => {
-    //TODO store quizz results
     setCurrentStep("finish");
   };
   const getPresenterVoice = async () => {
-    const voices = await getVoices();
-    const presenterVoice = voices.find((v: any) => v.name === "CABRA").voice_id;
-    setVoiceId(presenterVoice);
+    try {
+      const voices = await getVoices();
+      const goatVoice = voices.find((v: any) => v.name === "CABRA");
+      const presenterVoice = goatVoice
+        ? goatVoice.voice_id
+        : voices[0].voice_id;
+      setVoiceId(presenterVoice);
+    } catch (e) {
+      console.error("Error searching presenter voice");
+    }
   };
   const checkAnswer = async () => {
     if (questions && userResponse !== "") {
@@ -179,8 +294,8 @@ const Home = () => {
       } else {
         await playFile(`${audioFolder}/error_${languageCode}.mp3`);
       }
-      if (explainAudio) {
-        await playAudio(explainAudio);
+      if (audios) {
+        await playAudio(audios[currentQuestion].explain);
       }
       if (currentQuestion === questions.length - 1) {
         finishQuizz();
@@ -190,32 +305,57 @@ const Home = () => {
     }
   };
 
+  //Go next question or finish when user response
   useEffect(() => {
     if (!questions || userResponse === "") {
       return;
     }
-
-    if (currentQuestion > questions?.length) {
-      finishQuizz();
-      return;
-    }
-
     checkAnswer();
   }, [userResponse]);
 
+  //Watcher for next question if user pass last one and next question is still loading
   useEffect(() => {
     if (questions) {
-      if (currentQuestion > questions?.length - 1) {
-        finishQuizz();
-      } else if (currentQuestion > -1) {
+      if (questions?.length > 0 && questions[currentQuestion] !== undefined) {
+        setIsAppLoading(false);
         getNextQuestion();
       }
     }
-  }, [currentQuestion]);
+  }, [audios, currentQuestion]);
 
+  //Manage screens
+  useEffect(() => {
+    if (currentStep !== "finish") return;
+    setHistory([
+      ...history,
+      {
+        topic: currentTopic,
+        score: currentScore,
+      },
+    ]);
+    localStorage.setItem(
+      "history",
+      JSON.stringify([
+        ...history,
+        {
+          topic: currentTopic,
+          score: currentScore,
+        },
+      ])
+    );
+  }, [currentStep]);
+
+  //Init setup
   useEffect(() => {
     setQuestions(undefined);
     setCurrentScore(0);
+    setIsAppLoading(false);
+    setAudios(undefined);
+    const history = localStorage.getItem("history");
+    if (history) {
+      setHistory(JSON.parse(history));
+    }
+
     const user = usePlayerDataStore.getState();
     if (user.name === "") {
       setCurrentStep("selectLanguage");
@@ -224,34 +364,6 @@ const Home = () => {
     }
     if (voiceId === "") {
       getPresenterVoice();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentStep !== "finish") return;
-    setHistory([
-      ...history,
-      {
-        topic: currentTopic,
-        score: currentScore
-      }
-    ]);
-    localStorage.setItem(
-      "history",
-      JSON.stringify([
-        ...history,
-        {
-          topic: currentTopic,
-          score: currentScore
-        }
-      ])
-    );
-  }, [currentStep]);
-
-  useEffect(() => {
-    const history = localStorage.getItem("history");
-    if (history) {
-      setHistory(JSON.parse(history));
     }
   }, []);
 
@@ -282,18 +394,11 @@ const Home = () => {
           ) : (
             <AnimatePresence mode="wait">
               {currentStep === "selectLanguage" && (
-                <LanguageNameStep
-                  key="selectLanguage"
-                  repeatAudio={repeatAudio}
-                />
+                <LanguageNameStep key="selectLanguage" />
               )}
 
               {currentStep === "selectTopic" && (
-                <TopicStep
-                  prepareQuizz={prepareQuizz}
-                  key="selectTopic"
-                  repeatAudio={repeatAudio}
-                />
+                <TopicStep prepareQuizz={prepareQuizz} key="selectTopic" />
               )}
               {currentStep === "quizz" && (
                 <QuizzStep

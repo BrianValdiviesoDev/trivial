@@ -7,20 +7,26 @@ export interface Question {
     explain: string,
 }
 
+export interface ChatMessage {
+    role: string,
+    content: string,
+}
 
-export const getQuestions = async (topic:string, language:string, numberOfQuestions:number):Promise<Question[]>=>{
-    const url = 'https://api.openai.com/v1/chat/completions';
-    const prompt_es = `Dime ${numberOfQuestions} preguntas tipo test sobre ${topic} de nivel medio con 4 posibles respuestas sin enumerar y dime la correcta.
-    No numeres ni marques con letras las respuestas.
-    Todas las respuestas deben tener una longitud mínima de 50 caracteres y comenzar por una palabra
-    Sustituye cualquier número que pueda aparecer en la pregunta y en las respuestas por letras.
-    Damela en formato json con la siguiente estructura:
+export const getPrompt = (topic:string, language:string, numberOfQuestions:number):string=>{
+    const prompt_es = `
+    Imagina que eres un presentador de un concurso de preguntas. 
+    Dime ${numberOfQuestions} preguntas tipo test sobre ${topic} de nivel medio adaptadas para un software de síntesis de voz.
+    Con 4 posibles respuestas sin enumerar.
+    Dime la correcta.
+    Damela en formato json con la siguiente estructura.
+    Estructura: """
     [{
         question: "question_text",
         "options": ["first_option", "second_option", "third_option", "other_option"],
         "answer": "correct_answer",
         "explain": "question explanation",
     }]
+    """
     `;
 
     const prompt_en = `Give me ${numberOfQuestions} multiple-choice questions about ${topic} of intermediate level with 4 possible answers, unnumbered, and tell me the correct one.
@@ -36,30 +42,42 @@ export const getQuestions = async (topic:string, language:string, numberOfQuesti
     `;
 
     const prompt = language==='es' ? prompt_es : prompt_en;
+    return prompt;
+}
+
+export const replaceNumbers = (text:string):string | null=>{
+    const regex = /\d/;
+    
+    if(regex.test(text)){
+        return `Sustituye los números o fechas del texto por su expresión alfabética.
+        Texto:
+        """
+        ${text}
+        """`
+    }
+
+    return null;
+}
+
+export const chatRequest = async (prompt:string, context?: ChatMessage[]):Promise<string>=>{
+    const url = 'https://api.openai.com/v1/chat/completions';
+    
     const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
     };
-
+    if(!context){
+        context = [];
+    }
+    
+    context.push({role: 'system', "content": prompt })
+    console.log("CHAT: ",context);
     const data = JSON.stringify({
         "model": "gpt-3.5-turbo-0613",//"gpt-3.5-turbo",
-        "messages": [
-        {
-            "role": "user",
-            "content": prompt
-        }
-        ]
+        "messages": context
     });
     const response = await axios.post(url, data,{headers})
-    const responseContent = JSON.parse(response.data.choices[0].message.content);
-    const question:Question[] = responseContent.map((q:Question)=> ({
-        question: q.question,
-        options:q.options,
-        answer: q.answer,
-        explain: q.explain,
-    }));
-    return question;
-
+    return response.data.choices[0].message.content;
 }
 
 

@@ -7,9 +7,7 @@ import TextButton from "../UI/TextButton";
 import { useRef } from "react";
 import { AvailableLanguages, LANGUAGES } from "../../utils/constans";
 
-const LanguageNameStep: React.FC<{
-  repeatAudio: () => Promise<void>;
-}> = ({ repeatAudio }) => {
+const LanguageNameStep: React.FC<{}> = () => {
   // Refs
   const selectRef = useRef<HTMLSelectElement>(null);
 
@@ -24,13 +22,12 @@ const LanguageNameStep: React.FC<{
       animate={{ x: 0, opacity: 1 }}
       exit={{
         x: "-100vw",
-        opacity: 0
+        opacity: 0,
       }}
       transition={{ duration: 0.5 }}
     >
       <img
         key="presenter"
-        onClick={() => repeatAudio()}
         className={styles.container_presenter__image}
         src="/assets/cabraTrivial.png"
         alt=""
