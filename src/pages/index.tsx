@@ -50,7 +50,7 @@ const Home = () => {
   const [error, setError] = useState<string | null>();
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
-  const audioFolder = "/assets";
+  const audioFolder = "assets";
   const numberOfQuestions = 5;
   const addToConversation = (msg: ChatMessage) => {
     const newConversations = [...conversation, msg];
@@ -314,7 +314,6 @@ const Home = () => {
   //Go next question or finish when user response
   useEffect(() => {
     if (!questions || userResponse === undefined) {
-      console.log(userResponse);
       return;
     }
     checkAnswer();
@@ -380,7 +379,9 @@ const Home = () => {
 
   const getAudioFiles = async (folderUrl: string): Promise<string[]> => {
     const publicPath = `/public/${folderUrl}`;
-    const response = await fetch(`/api/listFiles?directoryPath=${publicPath}`);
+    const response = await fetch(
+      `/api/listFiles?directoryPath=${encodeURIComponent(publicPath)}`
+    );
     const data = await response.json();
     return data.fileList;
   };
