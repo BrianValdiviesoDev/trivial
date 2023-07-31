@@ -19,7 +19,7 @@ export const getPrompt = (
 ): string => {
   const prompt_es = `
     Imagina que eres un presentador de un concurso de preguntas. 
-    Dime ${numberOfQuestions} preguntas tipo test sobre ${topic} de nivel medio adaptadas para un software de síntesis de voz.
+    Dime ${numberOfQuestions} preguntas tipo test sobre ${topic} de nivel medio que no me hayas dicho antes y que no estén repetidas.
     Con 4 posibles respuestas sin enumerar.
     Dime la correcta.
     Damela en formato json con la siguiente estructura.
@@ -33,16 +33,19 @@ export const getPrompt = (
     """
     `;
 
-  const prompt_en = `Give me ${numberOfQuestions} multiple-choice questions about ${topic} of intermediate level with 4 possible answers, unnumbered, and tell me the correct one.
-    Replace any number with its word representation.
-    All answers should have a minimum length of 50 characters and start with a word.
-    Provide it to me in JSON format with the following structure:
+  const prompt_en = `Imagine you are a quiz show presenter.
+    Give me ${numberOfQuestions} multiple-choice questions about ${topic} of medium difficulty that you haven't told me before and that are not repeated.
+    Provide 4 possible answers without numbering.
+    Tell me the correct answer.
+    Give them to me in JSON format with the following structure.
+    Structure: """
     [{
-        question: "question_text",
-        "options": ["first_option", "second_option", "third_option", "other_option"],
-        "answer": "correct_answer",
-        "explain": "question explanation",
+    "question": "question_text",
+    "options": ["first_option", "second_option", "third_option", "other_option"],
+    "answer": "correct_answer",
+    "explain": "question explanation",
     }]
+    """
     `;
 
   const prompt = language === "es" ? prompt_es : prompt_en;

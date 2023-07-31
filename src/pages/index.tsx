@@ -13,7 +13,7 @@ import {
   chatRequest,
   getModels,
   getPrompt,
-  replaceNumbers
+  replaceNumbers,
 } from "@/services/openai.service";
 import { Trans } from "@lingui/react";
 import { useAppStatusStore } from "../store/appStatusStore";
@@ -22,7 +22,6 @@ import LanguageNameStep from "../components/steps/LanguageNameStep";
 import TopicStep from "../components/steps/TopicStep";
 import QuizzStep from "../components/steps/QuizzStep";
 import FinishStep from "../components/steps/FinishStep";
-
 interface QuestionAudios {
   question: AudioBuffer;
   answers: AudioBuffer;
@@ -37,7 +36,7 @@ const Home = () => {
     currentScore,
     setCurrentScore,
     history,
-    setHistory
+    setHistory,
   } = usePlayerDataStore();
   const { setIsAppLoading, setIsAppPersonalized } = useAppStatusStore();
   const { currentStep, setCurrentStep } = useGameDataStore();
@@ -46,14 +45,13 @@ const Home = () => {
   const [questions, setQuestions] = useState<Question[]>();
   const [currentQuestion, setCurrentQuestion] = useState<number>(-1);
   const [audios, setAudios] = useState<QuestionAudios[]>();
-  const [userResponse, setUserResponse] = useState<string>();
+  const [userResponse, setUserResponse] = useState<number>();
   const [voiceId, setVoiceId] = useState<string>("");
   const [error, setError] = useState<string | null>();
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
-  const audioFolder = "./assets";
+  const audioFolder = "/assets";
   const numberOfQuestions = 5;
-
   const addToConversation = (msg: ChatMessage) => {
     const newConversations = [...conversation, msg];
     setConversation(newConversations);
@@ -65,11 +63,11 @@ const Home = () => {
       const questionWithoutNumbers = await chatRequest(questionHasNumbers);
       const myRequest: ChatMessage = {
         role: "system",
-        content: questionHasNumbers
+        content: questionHasNumbers,
       };
       const iaResponse: ChatMessage = {
         role: "assistant",
-        content: questionWithoutNumbers
+        content: questionWithoutNumbers,
       };
       addToConversation(myRequest);
       addToConversation(iaResponse);
@@ -82,11 +80,11 @@ const Home = () => {
       const explainWithoutNumbers = await chatRequest(explainHasNumbers);
       const myRequest: ChatMessage = {
         role: "system",
-        content: explainHasNumbers
+        content: explainHasNumbers,
       };
       const iaResponse: ChatMessage = {
         role: "assistant",
-        content: explainWithoutNumbers
+        content: explainWithoutNumbers,
       };
       addToConversation(myRequest);
       addToConversation(iaResponse);
@@ -100,11 +98,11 @@ const Home = () => {
         const withoutNumbers = await chatRequest(hasNumbers);
         const myRequest: ChatMessage = {
           role: "system",
-          content: hasNumbers
+          content: hasNumbers,
         };
         const iaResponse: ChatMessage = {
           role: "assistant",
-          content: withoutNumbers
+          content: withoutNumbers,
         };
         addToConversation(myRequest);
         addToConversation(iaResponse);
@@ -125,22 +123,23 @@ const Home = () => {
         const prompt = getPrompt(currentTopic, language, 1);
         const myRequest: ChatMessage = {
           role: "system",
-          content: prompt
+          content: prompt,
         };
         const response = await chatRequest(prompt, conversation);
         const iaResponse: ChatMessage = {
           role: "assistant",
-          content: response
+          content: response,
         };
         addToConversation(myRequest);
         addToConversation(iaResponse);
 
         const data = JSON.parse(response)[0];
+        const answerIndex = data.options.findIndex((o) => o === data.answer);
         const newQuestion: Question = {
           question: data.question,
           options: data.options,
-          answer: data.answer,
-          explain: data.explain
+          answer: answerIndex,
+          explain: data.explain,
         };
         questions[i] = newQuestion;
         setQuestions(questions);
@@ -172,7 +171,7 @@ const Home = () => {
     const response = {
       question: questionAudio,
       answers: responsesAudio,
-      explain: explainAudio
+      explain: explainAudio,
     };
     return response;
   };
@@ -191,8 +190,8 @@ const Home = () => {
           "Respuesta d",
           "Respuesta e",
           "Respuesta f",
-          "Respuesta g"
-        ]
+          "Respuesta g",
+        ],
       },
       {
         language: "en",
@@ -203,9 +202,9 @@ const Home = () => {
           "Answer d",
           "Answer e",
           "Answer f",
-          "Answer g"
-        ]
-      }
+          "Answer g",
+        ],
+      },
     ];
 
     const preAnswers = indexes.find((l) => l.language === language);
@@ -287,13 +286,18 @@ const Home = () => {
   };
   const checkAnswer = async () => {
     if (questions && userResponse !== "") {
-      const languageCode =
-        LANGUAGES.find((l) => l.code === language)?.code || "en";
+      const folderUrl = `${audioFolder}/audios_${language}`;
+      const files = await getAudioFiles(folderUrl);
+
       if (userResponse === questions[currentQuestion].answer) {
         setCurrentScore(currentScore + 1);
-        await playFile(`${audioFolder}/correct_${languageCode}.mp3`);
+        const rightFiles = files.filter((f) => f.includes("right"));
+        const randomIndex = Math.floor(Math.random() * rightFiles.length);
+        await playFile(`./${folderUrl}/${rightFiles[randomIndex]}`);
       } else {
-        await playFile(`${audioFolder}/error_${languageCode}.mp3`);
+        const wrongFiles = files.filter((f) => f.includes("wrong"));
+        const randomIndex = Math.floor(Math.random() * wrongFiles.length);
+        await playFile(`./${folderUrl}/${wrongFiles[randomIndex]}`);
       }
       if (audios) {
         await playAudio(audios[currentQuestion]?.explain);
@@ -331,8 +335,8 @@ const Home = () => {
       ...history,
       {
         topic: currentTopic,
-        score: currentScore
-      }
+        score: currentScore,
+      },
     ]);
     localStorage.setItem(
       "history",
@@ -340,8 +344,8 @@ const Home = () => {
         ...history,
         {
           topic: currentTopic,
-          score: currentScore
-        }
+          score: currentScore,
+        },
       ])
     );
   }, [currentStep]);
@@ -363,6 +367,23 @@ const Home = () => {
 
     name && language && setCurrentStep("selectTopic");
   }, []);
+
+  const testRandom = async () => {
+    const folderUrl = `${audioFolder}/audios_${language}`;
+    const files = await getAudioFiles(folderUrl);
+    const rightFiles = files.filter((f) => f.includes("right"));
+    const randomIndex = Math.floor(Math.random() * rightFiles.length);
+    await playFile(`.${folderUrl}/${rightFiles[randomIndex]}`);
+  };
+
+  const getAudioFiles = async (folderUrl: string): Promise<string[]> => {
+    const publicPath = `/public/${folderUrl}`;
+    const response = await fetch(
+      `/api/listFiles?directoryPath=${encodeURIComponent(publicPath)}`
+    );
+    const data = await response.json();
+    return data.fileList;
+  };
 
   //Init setup
   useEffect(() => {

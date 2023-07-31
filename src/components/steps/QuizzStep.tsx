@@ -4,7 +4,7 @@ import { Question } from "../../services/openai.service";
 import TextButton from "../UI/TextButton";
 
 const QuizzStep: React.FC<{
-  setUserResponse: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setUserResponse: React.Dispatch<React.SetStateAction<number | undefined>>;
   questions: Question[] | undefined;
   currentQuestion: number;
   isSpeaking: boolean;
@@ -61,7 +61,7 @@ const QuizzStep: React.FC<{
               <TextButton
                 key={i}
                 disabled={isSpeaking}
-                action={() => setUserResponse(option)}
+                action={() => setUserResponse(i)}
               >
                 {option}
               </TextButton>
