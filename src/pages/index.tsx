@@ -288,17 +288,22 @@ const Home = () => {
   };
   const checkAnswer = async () => {
     if (questions && userResponse !== undefined) {
-      const folderUrl = `${audioFolder}/audios_${language}`;
-      const files = await getAudioFiles(folderUrl);
+      // const folderUrl = `${audioFolder}/audios_${language}`;
+      // const files = await getAudioFiles(folderUrl);
       if (userResponse === questions[currentQuestion].answer) {
         setCurrentScore(currentScore + 1);
-        const rightFiles = files.filter((f) => f.includes("right"));
-        const randomIndex = Math.floor(Math.random() * rightFiles.length);
-        await playFile(`./${folderUrl}/${rightFiles[randomIndex]}`);
+        // const rightFiles = files.filter((f) => f.includes("right"));
+        const randomIndex = Math.floor(Math.random() * 7);
+        // await playFile(`./${folderUrl}/${rightFiles[randomIndex]}`);;
+        await playFile(
+          `/assets/audios_${language}/right_${randomIndex}_${language.toUpperCase()}.mp3`
+        );
       } else {
-        const wrongFiles = files.filter((f) => f.includes("wrong"));
-        const randomIndex = Math.floor(Math.random() * wrongFiles.length);
-        await playFile(`./${folderUrl}/${wrongFiles[randomIndex]}`);
+        // const wrongFiles = files.filter((f) => f.includes("wrong"));
+        const randomIndex = Math.floor(Math.random() * 7);
+        await playFile(
+          `/assets/audios_${language}/wrong_${randomIndex}_${language.toUpperCase()}.mp3`
+        );
       }
       if (audios) {
         await playAudio(audios[currentQuestion]?.explain);
@@ -378,7 +383,7 @@ const Home = () => {
   };
 
   const getAudioFiles = async (folderUrl: string): Promise<string[]> => {
-    const publicPath = `/public/${folderUrl}`;
+    const publicPath = `${folderUrl}`;
     const response = await fetch(
       `/api/listFiles?directoryPath=${encodeURIComponent(publicPath)}`
     );
