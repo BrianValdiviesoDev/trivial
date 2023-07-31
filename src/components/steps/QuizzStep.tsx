@@ -14,7 +14,7 @@ const QuizzStep: React.FC<{
   questions,
   currentQuestion,
   isSpeaking,
-  repeatAudio,
+  repeatAudio
 }) => {
   return (
     <motion.div
@@ -23,7 +23,7 @@ const QuizzStep: React.FC<{
       animate={{ x: 0, opacity: 1 }}
       exit={{
         x: "-100vw",
-        opacity: 0,
+        opacity: 0
       }}
       transition={{ duration: 0.5 }}
     >

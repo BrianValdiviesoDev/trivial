@@ -3,7 +3,7 @@ import axios from "axios";
 export interface Question {
   question: string;
   options: string[];
-  answer: string;
+  answer: number;
   explain: string;
 }
 

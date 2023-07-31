@@ -13,7 +13,7 @@ import {
   chatRequest,
   getModels,
   getPrompt,
-  replaceNumbers,
+  replaceNumbers
 } from "@/services/openai.service";
 import { Trans } from "@lingui/react";
 import { useAppStatusStore } from "../store/appStatusStore";
@@ -36,7 +36,7 @@ const Home = () => {
     currentScore,
     setCurrentScore,
     history,
-    setHistory,
+    setHistory
   } = usePlayerDataStore();
   const { setIsAppLoading, setIsAppPersonalized } = useAppStatusStore();
   const { currentStep, setCurrentStep } = useGameDataStore();
@@ -63,11 +63,11 @@ const Home = () => {
       const questionWithoutNumbers = await chatRequest(questionHasNumbers);
       const myRequest: ChatMessage = {
         role: "system",
-        content: questionHasNumbers,
+        content: questionHasNumbers
       };
       const iaResponse: ChatMessage = {
         role: "assistant",
-        content: questionWithoutNumbers,
+        content: questionWithoutNumbers
       };
       addToConversation(myRequest);
       addToConversation(iaResponse);
@@ -80,11 +80,11 @@ const Home = () => {
       const explainWithoutNumbers = await chatRequest(explainHasNumbers);
       const myRequest: ChatMessage = {
         role: "system",
-        content: explainHasNumbers,
+        content: explainHasNumbers
       };
       const iaResponse: ChatMessage = {
         role: "assistant",
-        content: explainWithoutNumbers,
+        content: explainWithoutNumbers
       };
       addToConversation(myRequest);
       addToConversation(iaResponse);
@@ -98,11 +98,11 @@ const Home = () => {
         const withoutNumbers = await chatRequest(hasNumbers);
         const myRequest: ChatMessage = {
           role: "system",
-          content: hasNumbers,
+          content: hasNumbers
         };
         const iaResponse: ChatMessage = {
           role: "assistant",
-          content: withoutNumbers,
+          content: withoutNumbers
         };
         addToConversation(myRequest);
         addToConversation(iaResponse);
@@ -123,23 +123,25 @@ const Home = () => {
         const prompt = getPrompt(currentTopic, language, 1);
         const myRequest: ChatMessage = {
           role: "system",
-          content: prompt,
+          content: prompt
         };
         const response = await chatRequest(prompt, conversation);
         const iaResponse: ChatMessage = {
           role: "assistant",
-          content: response,
+          content: response
         };
         addToConversation(myRequest);
         addToConversation(iaResponse);
 
         const data = JSON.parse(response)[0];
-        const answerIndex = data.options.findIndex((o) => o === data.answer);
+        const answerIndex = data.options.findIndex(
+          (o: string) => o === data.answer
+        );
         const newQuestion: Question = {
           question: data.question,
           options: data.options,
           answer: answerIndex,
-          explain: data.explain,
+          explain: data.explain
         };
         questions[i] = newQuestion;
         setQuestions(questions);
@@ -171,7 +173,7 @@ const Home = () => {
     const response = {
       question: questionAudio,
       answers: responsesAudio,
-      explain: explainAudio,
+      explain: explainAudio
     };
     return response;
   };
@@ -190,8 +192,8 @@ const Home = () => {
           "Respuesta d",
           "Respuesta e",
           "Respuesta f",
-          "Respuesta g",
-        ],
+          "Respuesta g"
+        ]
       },
       {
         language: "en",
@@ -202,9 +204,9 @@ const Home = () => {
           "Answer d",
           "Answer e",
           "Answer f",
-          "Answer g",
-        ],
-      },
+          "Answer g"
+        ]
+      }
     ];
 
     const preAnswers = indexes.find((l) => l.language === language);
@@ -218,7 +220,7 @@ const Home = () => {
     return audio;
   };
   const getNextQuestion = async () => {
-    setUserResponse("");
+    setUserResponse(undefined);
 
     if (audios && voiceId) {
       if (audios[currentQuestion]) {
@@ -285,10 +287,9 @@ const Home = () => {
     }
   };
   const checkAnswer = async () => {
-    if (questions && userResponse !== "") {
+    if (questions && userResponse) {
       const folderUrl = `${audioFolder}/audios_${language}`;
       const files = await getAudioFiles(folderUrl);
-
       if (userResponse === questions[currentQuestion].answer) {
         setCurrentScore(currentScore + 1);
         const rightFiles = files.filter((f) => f.includes("right"));
@@ -312,7 +313,7 @@ const Home = () => {
 
   //Go next question or finish when user response
   useEffect(() => {
-    if (!questions || userResponse === "") {
+    if (!questions || !userResponse) {
       return;
     }
     checkAnswer();
@@ -335,8 +336,8 @@ const Home = () => {
       ...history,
       {
         topic: currentTopic,
-        score: currentScore,
-      },
+        score: currentScore
+      }
     ]);
     localStorage.setItem(
       "history",
@@ -344,8 +345,8 @@ const Home = () => {
         ...history,
         {
           topic: currentTopic,
-          score: currentScore,
-        },
+          score: currentScore
+        }
       ])
     );
   }, [currentStep]);
