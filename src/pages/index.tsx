@@ -287,7 +287,7 @@ const Home = () => {
     }
   };
   const checkAnswer = async () => {
-    if (questions && userResponse) {
+    if (questions && userResponse !== undefined) {
       const folderUrl = `${audioFolder}/audios_${language}`;
       const files = await getAudioFiles(folderUrl);
       if (userResponse === questions[currentQuestion].answer) {
@@ -313,7 +313,8 @@ const Home = () => {
 
   //Go next question or finish when user response
   useEffect(() => {
-    if (!questions || !userResponse) {
+    if (!questions || userResponse === undefined) {
+      console.log(userResponse);
       return;
     }
     checkAnswer();
@@ -379,9 +380,7 @@ const Home = () => {
 
   const getAudioFiles = async (folderUrl: string): Promise<string[]> => {
     const publicPath = `/public/${folderUrl}`;
-    const response = await fetch(
-      `/api/listFiles?directoryPath=${encodeURIComponent(publicPath)}`
-    );
+    const response = await fetch(`/api/listFiles?directoryPath=${publicPath}`);
     const data = await response.json();
     return data.fileList;
   };
